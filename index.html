@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -38,10 +39,15 @@
       <select id="sort" onchange="renderList()">
         <option value="">정렬 없음</option>
         <option value="title">제목순</option>
-        <option value="category">카테고리순</option>
+        <option value="category">카테고리별 분리</option>
       </select>
     </div>
     <ul id="itemList"></ul>
+    <div id="category-sections" style="display:none">
+      <h2>📖 웹소설</h2><ul id="list-webnovel"></ul>
+      <h2>📺 웹툰</h2><ul id="list-webtoon"></ul>
+      <h2>🎮 게임</h2><ul id="list-game"></ul>
+    </div>
   </div>
 
   <script>
@@ -83,7 +89,7 @@
     }
 
     function editItem(index) {
-      const listItem = document.querySelectorAll('#itemList li')[index];
+      const listItem = document.querySelectorAll('#itemList li, #list-webnovel li, #list-webtoon li, #list-game li')[index];
       const item = items[index];
 
       listItem.innerHTML = `
@@ -117,31 +123,56 @@
     }
 
     function renderList() {
-      const list = document.getElementById('itemList');
       const search = document.getElementById('search').value.toLowerCase();
       const sort = document.getElementById('sort').value;
+      const defaultList = document.getElementById('itemList');
+      const sections = {
+        웹소설: document.getElementById('list-webnovel'),
+        웹툰: document.getElementById('list-webtoon'),
+        게임: document.getElementById('list-game')
+      };
 
       let filtered = items.map((item, index) => ({ ...item, index }))
         .filter(item => item.title.toLowerCase().includes(search));
 
-      if (sort === 'title') {
-        filtered.sort((a, b) => a.title.localeCompare(b.title));
-      } else if (sort === 'category') {
-        filtered.sort((a, b) => a.category.localeCompare(b.category));
-      }
+      defaultList.innerHTML = '';
+      Object.values(sections).forEach(ul => ul.innerHTML = '');
 
-      list.innerHTML = '';
-      filtered.forEach(({ category, title, rating, index }) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <span><span class="category">[${category}]</span> ${title} - 평점: ${rating}/10</span>
-          <div class="btn-group">
-            <button class="edit-btn" onclick="editItem(${index})">수정</button>
-            <button class="delete-btn" onclick="deleteItem(${index})">삭제</button>
-          </div>
-        `;
-        list.appendChild(li);
-      });
+      if (sort === 'category') {
+        document.getElementById('category-sections').style.display = 'block';
+        defaultList.style.display = 'none';
+
+        filtered.forEach(({ category, title, rating, index }) => {
+          const li = document.createElement('li');
+          li.innerHTML = \`
+            <span><span class="category">[\${category}]</span> \${title} - 평점: \${rating}/10</span>
+            <div class="btn-group">
+              <button class="edit-btn" onclick="editItem(\${index})">수정</button>
+              <button class="delete-btn" onclick="deleteItem(\${index})">삭제</button>
+            </div>
+          \`;
+          sections[category]?.appendChild(li);
+        });
+      } else {
+        document.getElementById('category-sections').style.display = 'none';
+        defaultList.style.display = 'block';
+
+        if (sort === 'title') {
+          filtered.sort((a, b) => a.title.localeCompare(b.title));
+        }
+
+        filtered.forEach(({ category, title, rating, index }) => {
+          const li = document.createElement('li');
+          li.innerHTML = \`
+            <span><span class="category">[\${category}]</span> \${title} - 평점: \${rating}/10</span>
+            <div class="btn-group">
+              <button class="edit-btn" onclick="editItem(\${index})">수정</button>
+              <button class="delete-btn" onclick="deleteItem(\${index})">삭제</button>
+            </div>
+          \`;
+          defaultList.appendChild(li);
+        });
+      }
     }
 
     renderList();

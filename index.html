@@ -12,9 +12,8 @@
     input, select { padding: 5px; font-size: 1rem; }
     button { padding: 6px 12px; cursor: pointer; }
     ul { list-style-type: none; padding: 0; }
-    li { background: #fff; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+    li { background: #fff; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
     .category { font-weight: bold; color: #555; }
-    .delete-btn { background: #dc3545; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -23,7 +22,7 @@
     <div class="entry">
       <select id="category">
         <option value="웹소설">📚 웹소설</option>
-        <option value="웹툰">🎞️ 웹툰</option>
+        <option value="웹툰">🎬 웹툰</option>
         <option value="게임">🎮 게임</option>
       </select>
       <input type="text" id="title" placeholder="제목 입력">
@@ -44,19 +43,11 @@
       if (!title) return alert('제목을 입력하세요.');
 
       const li = document.createElement('li');
-      li.innerHTML = `
-        <span><span class="category">[${category}]</span> ${title} - 평점: ${rating}/10</span>
-        <button class="delete-btn" onclick="deleteItem(this)">삭제</button>
-      `;
+      li.innerHTML = `<span class="category">[${category}]</span> ${title} - 평점: ${rating}/10`;
       itemList.appendChild(li);
 
       document.getElementById('title').value = '';
       document.getElementById('rating').value = '';
-    }
-
-    function deleteItem(button) {
-      const li = button.parentElement;
-      itemList.removeChild(li);
     }
   </script>
 </body>

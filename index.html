@@ -1,19 +1,21 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>웹소설/웹툰/게임 리스트</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>웹소설 / 웹툰 / 게임 리스트</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f8f9fa; margin: 20px; }
     h1 { text-align: center; }
     .container { max-width: 800px; margin: auto; }
-    .entry { display: flex; gap: 10px; margin-bottom: 10px; }
+    .entry, .search-sort { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
     input, select { padding: 5px; font-size: 1rem; }
     button { padding: 6px 12px; cursor: pointer; }
     ul { list-style-type: none; padding: 0; }
-    li { background: #fff; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    li { background: #fff; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
     .category { font-weight: bold; color: #555; }
+    .delete-btn { background: #dc3545; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -21,19 +23,31 @@
     <h1>웹소설 / 웹툰 / 게임 리스트</h1>
     <div class="entry">
       <select id="category">
-        <option value="웹소설">📚 웹소설</option>
-        <option value="웹툰">🎬 웹툰</option>
+        <option value="웹소설">📖 웹소설</option>
+        <option value="웹툰">📺 웹툰</option>
         <option value="게임">🎮 게임</option>
       </select>
       <input type="text" id="title" placeholder="제목 입력">
       <input type="number" id="rating" placeholder="평점 (1~10)" min="1" max="10">
       <button onclick="addItem()">추가</button>
     </div>
+    <div class="search-sort">
+      <input type="text" id="search" placeholder="제목 검색..." oninput="renderList()">
+      <select id="sort" onchange="renderList()">
+        <option value="">정렬 없음</option>
+        <option value="title">제목순</option>
+        <option value="category">카테고리순</option>
+      </select>
+    </div>
     <ul id="itemList"></ul>
   </div>
 
   <script>
-    const itemList = document.getElementById('itemList');
+    let items = JSON.parse(localStorage.getItem('mediaList')) || [];
+
+    function saveItems() {
+      localStorage.setItem('mediaList', JSON.stringify(items));
+    }
 
     function addItem() {
       const category = document.getElementById('category').value;
@@ -42,13 +56,46 @@
 
       if (!title) return alert('제목을 입력하세요.');
 
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="category">[${category}]</span> ${title} - 평점: ${rating}/10`;
-      itemList.appendChild(li);
+      items.push({ category, title, rating });
+      saveItems();
+      renderList();
 
       document.getElementById('title').value = '';
       document.getElementById('rating').value = '';
     }
+
+    function deleteItem(index) {
+      if (!confirm('정말 삭제하시겠습니까?')) return;
+      items.splice(index, 1);
+      saveItems();
+      renderList();
+    }
+
+    function renderList() {
+      const list = document.getElementById('itemList');
+      const search = document.getElementById('search').value.toLowerCase();
+      const sort = document.getElementById('sort').value;
+
+      let filtered = items.filter(item => item.title.toLowerCase().includes(search));
+
+      if (sort === 'title') {
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (sort === 'category') {
+        filtered.sort((a, b) => a.category.localeCompare(b.category));
+      }
+
+      list.innerHTML = '';
+      filtered.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = \`
+          <span><span class="category">[\${item.category}]</span> \${item.title} - 평점: \${item.rating}/10</span>
+          <button class="delete-btn" onclick="deleteItem(\${index})">삭제</button>
+        \`;
+        list.appendChild(li);
+      });
+    }
+
+    renderList();
   </script>
 </body>
 </html>

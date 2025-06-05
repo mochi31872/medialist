@@ -14,7 +14,10 @@
     ul { list-style-type: none; padding: 0; }
     li { background: #fff; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
     .category { font-weight: bold; color: #555; }
+    .btn-group button { margin-left: 5px; }
+    .edit-inputs input, .edit-inputs select { margin-right: 5px; }
     .delete-btn { background: #dc3545; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
+    .edit-btn { background: #007bff; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -79,12 +82,47 @@
       renderList();
     }
 
+    function editItem(index) {
+      const listItem = document.querySelectorAll('#itemList li')[index];
+      const item = items[index];
+
+      listItem.innerHTML = `
+        <div class="edit-inputs">
+          <select id="edit-category-${index}">
+            <option value="웹소설"${item.category === '웹소설' ? ' selected' : ''}>📖 웹소설</option>
+            <option value="웹툰"${item.category === '웹툰' ? ' selected' : ''}>📺 웹툰</option>
+            <option value="게임"${item.category === '게임' ? ' selected' : ''}>🎮 게임</option>
+          </select>
+          <input type="text" id="edit-title-${index}" value="${item.title}">
+          <input type="number" id="edit-rating-${index}" value="${item.rating}" min="1" max="10">
+        </div>
+        <div class="btn-group">
+          <button onclick="saveEdit(${index})">저장</button>
+          <button onclick="renderList()">취소</button>
+        </div>
+      `;
+    }
+
+    function saveEdit(index) {
+      const category = document.getElementById(`edit-category-${index}`).value;
+      const title = document.getElementById(`edit-title-${index}`).value.trim();
+      const rating = document.getElementById(`edit-rating-${index}`).value;
+
+      if (!title) return alert('제목을 입력하세요.');
+      if (!rating || rating < 1 || rating > 10) return alert('평점은 1~10 사이 숫자로 입력하세요.');
+
+      items[index] = { category, title, rating };
+      saveItems();
+      renderList();
+    }
+
     function renderList() {
       const list = document.getElementById('itemList');
       const search = document.getElementById('search').value.toLowerCase();
       const sort = document.getElementById('sort').value;
 
-      let filtered = items.filter(item => item.title.toLowerCase().includes(search));
+      let filtered = items.map((item, index) => ({ ...item, index }))
+        .filter(item => item.title.toLowerCase().includes(search));
 
       if (sort === 'title') {
         filtered.sort((a, b) => a.title.localeCompare(b.title));
@@ -93,11 +131,14 @@
       }
 
       list.innerHTML = '';
-      filtered.forEach((item, index) => {
+      filtered.forEach(({ category, title, rating, index }) => {
         const li = document.createElement('li');
         li.innerHTML = `
-          <span><span class="category">[${item.category}]</span> ${item.title} - 평점: ${item.rating}/10</span>
-          <button class="delete-btn" onclick="deleteItem(${index})">삭제</button>
+          <span><span class="category">[${category}]</span> ${title} - 평점: ${rating}/10</span>
+          <div class="btn-group">
+            <button class="edit-btn" onclick="editItem(${index})">수정</button>
+            <button class="delete-btn" onclick="deleteItem(${index})">삭제</button>
+          </div>
         `;
         list.appendChild(li);
       });

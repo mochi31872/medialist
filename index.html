@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>책/영화/게임 리스트</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fa; margin: 20px; }
+    h1 { text-align: center; }
+    .container { max-width: 800px; margin: auto; }
+    .entry { display: flex; gap: 10px; margin-bottom: 10px; }
+    input, select { padding: 5px; font-size: 1rem; }
+    button { padding: 6px 12px; cursor: pointer; }
+    ul { list-style-type: none; padding: 0; }
+    li { background: #fff; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    .category { font-weight: bold; color: #555; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>책 / 영화 / 게임 리스트</h1>
+    <div class="entry">
+      <select id="category">
+        <option value="책">📚 책</option>
+        <option value="영화">🎬 영화</option>
+        <option value="게임">🎮 게임</option>
+      </select>
+      <input type="text" id="title" placeholder="제목 입력">
+      <input type="number" id="rating" placeholder="평점 (1~10)" min="1" max="10">
+      <button onclick="addItem()">추가</button>
+    </div>
+    <ul id="itemList"></ul>
+  </div>
+
+  <script>
+    const itemList = document.getElementById('itemList');
+
+    function addItem() {
+      const category = document.getElementById('category').value;
+      const title = document.getElementById('title').value.trim();
+      const rating = document.getElementById('rating').value;
+
+      if (!title) return alert('제목을 입력하세요.');
+
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="category">[${category}]</span> ${title} - 평점: ${rating}/10`;
+      itemList.appendChild(li);
+
+      document.getElementById('title').value = '';
+      document.getElementById('rating').value = '';
+    }
+  </script>
+</body>
+</html>
